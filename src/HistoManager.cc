@@ -61,17 +61,20 @@ void HistoManager::Book()
   analysisManager->SetActivation(true);     //enable inactivation of histograms
   
   // Define histograms start values
-  const G4int kMaxHisto = 8;
-  const G4String id[] = {"0","1","2","3","4","5","6","7"};
+  const G4int kMaxHisto = 11;
+  const G4String id[] = {"0","1","2","3","4","5","6","7","8","9","10"};
   const G4String title[] = 
                 { "dummy",                                           //0
-                  "KE of neutron leaving sheilding",                 //1
-                  "KE of neutron entering wall",                     //2
-                  "KE of neutron entering window",                   //3
-                  "KE of  neutron entering door",                    //4
-                  "KE of Neutrons Leaving Lab Boundary",             //5
-                  "KE of Gamma Leaving Lab Boundary",                //6
-                  "incident neutron: energy distribution below 1*eV" //7
+                  "KE of neutrons leaving sheilding",                //1 
+                  "KE of neutrons leaving test volume 1",            //2     
+                  "KE of neutrons leaving test volume 2",            //3       
+                  "KE of neutrons leaving test volume 3",            //4       
+                  "KE of Neutrons leaving test volume 4",            //5
+                  "KE of gammas leaving sheilding",                //6
+                  "KE of gammas leaving test volume 1",            //7  
+                  "KE of gammas leaving test volume 2",            //8 
+                  "KE of gammas leaving test volume 3",            //9
+                  "KE of gammas leaving test volume 4",            //10
                  };  
 
   // Default values (to be reset via /analysis/h1/set command)               
@@ -87,7 +90,7 @@ void HistoManager::Book()
   }
 
   // ID=0, neutron transport
-  analysisManager->CreateNtuple("ntransport", "Neutrons crossing lab boundary"); //id = 0
+  analysisManager->CreateNtuple("nPoly", "Neutrons leaving polyethylene"); //id = 0
   analysisManager->CreateNtupleDColumn("x");
   analysisManager->CreateNtupleDColumn("y");
   analysisManager->CreateNtupleDColumn("z");
@@ -96,7 +99,7 @@ void HistoManager::Book()
   analysisManager->FinishNtuple();
 
     // ID=1, gamma transport
-  analysisManager->CreateNtuple("gtransport", "Gammas crossing boundary"); //id = 1
+  analysisManager->CreateNtuple("gPoly", "Gammas leaving polyethelyne"); //id = 1
   analysisManager->CreateNtupleDColumn("x");
   analysisManager->CreateNtupleDColumn("y");
   analysisManager->CreateNtupleDColumn("z");
@@ -120,6 +123,89 @@ void HistoManager::Book()
   analysisManager->CreateNtupleDColumn("z");
   analysisManager->CreateNtupleDColumn("KE");
   analysisManager->CreateNtupleIColumn("tag"); 
+  analysisManager->FinishNtuple();
+
+  // ID=4, gamma transport
+  analysisManager->CreateNtuple("nTV1", "Neutrons leaving test volume 1"); //id = 4
+  analysisManager->CreateNtupleDColumn("x");
+  analysisManager->CreateNtupleDColumn("y");
+  analysisManager->CreateNtupleDColumn("z");
+  analysisManager->CreateNtupleDColumn("KE");
+  analysisManager->CreateNtupleIColumn("tag"); 
+  analysisManager->FinishNtuple();
+
+  // ID=5, gamma transport
+  analysisManager->CreateNtuple("nTV2", "Neutrons leaving test volume 2"); //id = 5
+  analysisManager->CreateNtupleDColumn("x");
+  analysisManager->CreateNtupleDColumn("y");
+  analysisManager->CreateNtupleDColumn("z");
+  analysisManager->CreateNtupleDColumn("KE");
+  analysisManager->CreateNtupleIColumn("tag"); 
+  analysisManager->FinishNtuple();
+
+  // ID=6, gamma transport
+  analysisManager->CreateNtuple("nTV3", "Neutrons leaving test volume 3"); //id = 6
+  analysisManager->CreateNtupleDColumn("x");
+  analysisManager->CreateNtupleDColumn("y");
+  analysisManager->CreateNtupleDColumn("z");
+  analysisManager->CreateNtupleDColumn("KE");
+  analysisManager->CreateNtupleIColumn("tag"); 
+  analysisManager->FinishNtuple();
+
+  // ID=7, gamma transport
+  analysisManager->CreateNtuple("nTV4", "Neutrons leaving test volume 4"); //id = 7
+  analysisManager->CreateNtupleDColumn("x");
+  analysisManager->CreateNtupleDColumn("y");
+  analysisManager->CreateNtupleDColumn("z");
+  analysisManager->CreateNtupleDColumn("KE");
+  analysisManager->CreateNtupleIColumn("tag"); 
+  analysisManager->FinishNtuple();
+
+  // ID=8, gamma transport
+  analysisManager->CreateNtuple("gTV1", "Gammas leaving test volume 1"); //id = 8
+  analysisManager->CreateNtupleDColumn("x");
+  analysisManager->CreateNtupleDColumn("y");
+  analysisManager->CreateNtupleDColumn("z");
+  analysisManager->CreateNtupleDColumn("KE");
+  analysisManager->CreateNtupleIColumn("tag"); 
+  analysisManager->FinishNtuple();
+
+  // ID=9, gamma transport
+  analysisManager->CreateNtuple("gTV2", "Gammas leaving test volume 2"); //id = 9
+  analysisManager->CreateNtupleDColumn("x");
+  analysisManager->CreateNtupleDColumn("y");
+  analysisManager->CreateNtupleDColumn("z");
+  analysisManager->CreateNtupleDColumn("KE");
+  analysisManager->CreateNtupleIColumn("tag"); 
+  analysisManager->FinishNtuple();
+
+  // ID=10, gamma transport
+  analysisManager->CreateNtuple("gTV3", "Gammas leaving test volume 3"); //id = 10
+  analysisManager->CreateNtupleDColumn("x");
+  analysisManager->CreateNtupleDColumn("y");
+  analysisManager->CreateNtupleDColumn("z");
+  analysisManager->CreateNtupleDColumn("KE");
+  analysisManager->CreateNtupleIColumn("tag"); 
+  analysisManager->FinishNtuple();
+
+  // ID=11, gamma transport
+  analysisManager->CreateNtuple("gTV4", "Gammas leaving test volume 4"); //id = 11
+  analysisManager->CreateNtupleDColumn("x");
+  analysisManager->CreateNtupleDColumn("y");
+  analysisManager->CreateNtupleDColumn("z");
+  analysisManager->CreateNtupleDColumn("KE");
+  analysisManager->CreateNtupleIColumn("tag"); 
+  analysisManager->FinishNtuple();
+
+  // ID=12, plane locations
+  analysisManager->CreateNtuple("PlaneLoc", "The locations of each test plane"); //id = 12
+  analysisManager->CreateNtupleDColumn("x1");
+  analysisManager->CreateNtupleDColumn("x2");
+  analysisManager->CreateNtupleDColumn("y1");
+  analysisManager->CreateNtupleDColumn("y2");
+  analysisManager->CreateNtupleDColumn("z1");
+  analysisManager->CreateNtupleDColumn("z2");
+  analysisManager->CreateNtupleDColumn("Test Volume Number");
   analysisManager->FinishNtuple();
 }
 

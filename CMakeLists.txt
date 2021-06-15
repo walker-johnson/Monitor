@@ -48,10 +48,8 @@ set(Hadr04_SCRIPTS
     run01.mac 
     vis.mac
     analysis.mac
-    Plot.C
-    Fullplot.C
-    AnalysisRun.mac
     10e7run.mac
+    TestPlanePlot.C
   )
 
 foreach(_script ${Hadr04_SCRIPTS})

@@ -69,7 +69,9 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithADoubleAndUnit* fSizeCmd;
     G4UIcmdWithADoubleAndUnit* fPolySheildCmd;
     G4UIcmdWithADoubleAndUnit* fPbSheildCmd;
-    G4UIcommand*               fIsotopeCmd;    
+    G4UIcommand*               fIsotopeCmd;
+  G4UIcmdWithABool* fIsWater;
+  G4UIcmdWithADoubleAndUnit* fWaterThickness;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -31,17 +31,15 @@
 #
 # Draw geometry:
 /vis/drawVolume
-/vis/set/touchable World 0 lab 0
+/vis/set/touchable World 0 tp4 0 tp3 0 tp2 0 tp1 0 Water 0 
 /vis/touchable/set/colour 0.0666667 0.811765 0.909804 1
-/vis/set/touchable World 0 lab 0
-/vis/touchable/set/visibility true
-/vis/set/touchable World 0 Monitor 0
+/vis/set/touchable World 0 tp4 0 tp3 0 tp2 0 tp1 0 Monitor 0
 /vis/touchable/set/colour 0.886275 0.133333 0.133333 1
 /vis/touchable/set/visibility true
-/vis/set/touchable World 0 polyShield 0
+/vis/set/touchable World 0 tp4 0 tp3 0 tp2 0 tp1 0 polyShield 0
 /vis/touchable/set/colour 0.694118 0.0509804 0.65098 1
 /vis/touchable/set/visibility true
-/vis/set/touchable World 0 leadShield 0
+/vis/set/touchable World 0 tp4 0 tp3 0 tp2 0 tp1 0 leadShield 0
 /vis/touchable/set/colour 0.756863 0.490196 0.0666667 1
 /vis/touchable/set/visibility true
 /vis/set/touchable World 0

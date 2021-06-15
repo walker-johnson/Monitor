@@ -95,9 +95,10 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   if(particleName == "neutron" && post->GetStepStatus() == fGeomBoundary) {
 
     //neutrons exiting the source sheilding
-    if(preLogical == fDetector-> pbShieldL && postLogical == fDetector->worldL){
+    if(preLogical == fDetector-> pbShieldL && postLogical == fDetector->testPlane1L){
       fEventAction->fCount_neutron_exitShield++;
       if(fEventAction->fCount_neutron_exitShield==1){
+	G4AnalysisManager::Instance()->FillH1(1,ekin);
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(2,0,x/1000); //ID, column,value
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(2,1,y/1000); //ID, column,value
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(2,2,z/1000); //ID, column,value
@@ -105,46 +106,14 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 	 G4AnalysisManager::Instance()->FillNtupleIColumn(2,3,0); //ID, column, tag
 	 G4AnalysisManager::Instance()->AddNtupleRow(2);
       }
-    }
-
-    //neutrons entering lab walls/ceiling/floor
-    if(preLogical == fDetector->worldL && postLogical == fDetector->labL){
-      fEventAction->fCount_neutron_lab2wall++;
-      if(fEventAction->fCount_neutron_lab2wall==1) G4AnalysisManager::Instance()->FillH1(2,ekin);
-    }
-
-    
-    //neutrons entering windows
-    if(preLogical == fDetector->worldL &&
-       (postLogical == fDetector->win1L ||
-	postLogical == fDetector->win2L ||
-	postLogical == fDetector->win3L ||
-	postLogical == fDetector->win4L ||
-	postLogical == fDetector->win5L)){
-
-      fEventAction->fCount_neutron_lab2window++;
-      if(fEventAction->fCount_neutron_lab2window==1) G4AnalysisManager::Instance()->FillH1(3,ekin);
-    }
-
-    //neutrons entering door
-    if(preLogical == fDetector->worldL && postLogical == fDetector->doorL){
-      fEventAction->fCount_neutron_lab2door++;
-      if(fEventAction->fCount_neutron_lab2door==1) G4AnalysisManager::Instance()->FillH1(4,ekin);
+      
     }
        
-
     //neutrons leaving the lab
-    if((preLogical == fDetector->labL ||
-	preLogical == fDetector->win1L ||
-	preLogical == fDetector->win2L ||
-	preLogical == fDetector->win3L ||
-	preLogical == fDetector->win4L ||
-	preLogical == fDetector->win5L ||
-	preLogical == fDetector->doorL) &&
-        postLogical == fDetector->worldL){
+    if(preLogical == fDetector->polyShieldL &&
+        postLogical == fDetector->pbShieldL){
       fEventAction->fCount_neutron_leaveLab++;
       if(fEventAction->fCount_neutron_leaveLab==1){
-	 G4AnalysisManager::Instance()->FillH1(5,ekin);
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(0,0,x/1000); //ID, column,value
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(0,1,y/1000); //ID, column,value
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(0,2,z/1000); //ID, column,value
@@ -153,15 +122,62 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 	 G4AnalysisManager::Instance()->AddNtupleRow(0);
 
        }
-    } 
+    }
+
+    //neutrons leaving test volume 1
+    if(preLogical == fDetector->testPlane1L && postLogical == fDetector->testPlane2L){
+      G4AnalysisManager::Instance()->FillH1(2,ekin);
+      G4AnalysisManager::Instance()->FillNtupleDColumn(4,0,x/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(4,1,y/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(4,2,z/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(4,3,ekin); 
+      G4AnalysisManager::Instance()->FillNtupleIColumn(4,3,0); //ID, column, tag
+      G4AnalysisManager::Instance()->AddNtupleRow(4);
+    }
+
+    //neutrons leaving test volume 2
+    if(preLogical == fDetector->testPlane2L && postLogical == fDetector->testPlane3L){
+      G4AnalysisManager::Instance()->FillH1(3,ekin);
+      G4AnalysisManager::Instance()->FillNtupleDColumn(5,0,x/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(5,1,y/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(5,2,z/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(5,3,ekin); 
+      G4AnalysisManager::Instance()->FillNtupleIColumn(5,3,0); //ID, column, tag
+      G4AnalysisManager::Instance()->AddNtupleRow(5);
+    }
+
+    //neutrons leaving test volume 3
+    if(preLogical == fDetector->testPlane3L && postLogical == fDetector->testPlane4L){
+      G4AnalysisManager::Instance()->FillH1(4,ekin);
+      G4AnalysisManager::Instance()->FillNtupleDColumn(6,0,x/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(6,1,y/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(6,2,z/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(6,3,ekin); 
+      G4AnalysisManager::Instance()->FillNtupleIColumn(6,3,0); //ID, column, tag
+      G4AnalysisManager::Instance()->AddNtupleRow(6);
+    }
+
+    //neutrons leaving test volume 4
+    if(preLogical == fDetector->testPlane4L && postLogical == fDetector->worldL){
+      G4AnalysisManager::Instance()->FillH1(5,ekin);
+      G4AnalysisManager::Instance()->FillNtupleDColumn(7,0,x/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(7,1,y/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(7,2,z/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(7,3,ekin); 
+      G4AnalysisManager::Instance()->FillNtupleIColumn(7,3,0); //ID, column, tag
+      G4AnalysisManager::Instance()->AddNtupleRow(7);
+    }
   }
 
+  
   //Gamma passing through boundary
   if(particleName == "gamma" && post->GetStepStatus() == fGeomBoundary) {
 
-    if(preLogical == fDetector->pbShieldL && postLogical == fDetector->worldL){
+    //Gammas leaving shielding
+    if(preLogical == fDetector->pbShieldL && postLogical == fDetector->testPlane1L){
       fEventAction->fCount_gamma_leaveShield++;
-      if(fEventAction->fCount_gamma_leaveShield==1){ 
+      if(fEventAction->fCount_gamma_leaveShield==1){
+  	 G4AnalysisManager::Instance()->FillH1(6,ekin);
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(3,0,x/1000); //ID, column,value
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(3,1,y/1000); //ID, column,value
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(3,2,z/1000); //ID, column,value
@@ -171,20 +187,11 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       }
     }
 	
-       
-
     //gamma leaving the lab
-    if((preLogical == fDetector->labL ||
-	preLogical == fDetector->win1L ||
-	preLogical == fDetector->win2L ||
-	preLogical == fDetector->win3L ||
-	preLogical == fDetector->win4L ||
-	preLogical == fDetector->win5L ||
-	preLogical == fDetector->doorL) &&
-        postLogical == fDetector->worldL){
+    if(preLogical == fDetector->polyShieldL &&
+        postLogical == fDetector->pbShieldL){
       fEventAction->fCount_gamma_leaveLab++;
       if(fEventAction->fCount_gamma_leaveLab==1){
-	 G4AnalysisManager::Instance()->FillH1(6,ekin);
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(1,0,x/1000); //ID, column,value
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(1,1,y/1000); //ID, column,value
 	 G4AnalysisManager::Instance()->FillNtupleDColumn(1,2,z/1000); //ID, column,value
@@ -193,7 +200,51 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 	 G4AnalysisManager::Instance()->AddNtupleRow(1);
 
        }
-    } 
+    }
+
+    //gammas leaving test volume 1
+    if(preLogical == fDetector->testPlane1L && postLogical == fDetector->testPlane2L){
+      G4AnalysisManager::Instance()->FillH1(7,ekin);
+      G4AnalysisManager::Instance()->FillNtupleDColumn(8,0,x/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(8,1,y/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(8,2,z/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(8,3,ekin); 
+      G4AnalysisManager::Instance()->FillNtupleIColumn(8,3,0); //ID, column, tag
+      G4AnalysisManager::Instance()->AddNtupleRow(8);
+    }
+
+    //gammas leaving test volume 2
+    if(preLogical == fDetector->testPlane2L && postLogical == fDetector->testPlane3L){
+      G4AnalysisManager::Instance()->FillH1(8,ekin);
+      G4AnalysisManager::Instance()->FillNtupleDColumn(9,0,x/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(9,1,y/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(9,2,z/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(9,3,ekin); 
+      G4AnalysisManager::Instance()->FillNtupleIColumn(9,3,0); //ID, column, tag
+      G4AnalysisManager::Instance()->AddNtupleRow(9);
+    }
+
+    //gammas leaving test volume 3
+    if(preLogical == fDetector->testPlane3L && postLogical == fDetector->testPlane4L){
+      G4AnalysisManager::Instance()->FillH1(9,ekin);
+      G4AnalysisManager::Instance()->FillNtupleDColumn(10,0,x/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(10,1,y/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(10,2,z/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(10,3,ekin); 
+      G4AnalysisManager::Instance()->FillNtupleIColumn(10,3,0); //ID, column, tag
+      G4AnalysisManager::Instance()->AddNtupleRow(10);
+    }
+
+    //gammas leaving test volume 4
+    if(preLogical == fDetector->testPlane4L && postLogical == fDetector->worldL){
+      G4AnalysisManager::Instance()->FillH1(10,ekin);
+      G4AnalysisManager::Instance()->FillNtupleDColumn(11,0,x/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(11,1,y/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(11,2,z/1000); //ID, column,value
+      G4AnalysisManager::Instance()->FillNtupleDColumn(11,3,ekin); 
+      G4AnalysisManager::Instance()->FillNtupleIColumn(11,3,0); //ID, column, tag
+      G4AnalysisManager::Instance()->AddNtupleRow(11);
+    }
   }
     
 }

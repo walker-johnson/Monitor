@@ -55,12 +55,26 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   fDetDir = new G4UIdirectory("/testhadr/det/",broadcast);
   fDetDir->SetGuidance("detector construction commands");
 
+  fIsWater = new G4UIcmdWithABool("/testhadr/det/isWater", this);
+  fIsWater->SetGuidance("Use water tank shielding? (true/false)");
+  fIsWater->SetParameterName("isWater",false);
+  fIsWater->SetDefaultValue(true);
+  fIsWater->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  fWaterThickness = new G4UIcmdWithADoubleAndUnit("/testhadr/det/setWaterThickness",this);
+  fWaterThickness->SetGuidance("Input a thickness for water tank shielding");
+  fWaterThickness->SetParameterName("Thickness",false);
+  fWaterThickness->SetRange("Thickness>0");
+  fWaterThickness->SetUnitCategory("Length");
+  fWaterThickness->AvailableForStates(G4State_PreInit, G4State_Idle);  
+  
   fMonitorRadius = new G4UIcmdWithADoubleAndUnit("/testhadr/det/setMonitorRadius",this);
   fMonitorRadius->SetGuidance("Input a monitor radius");
   fMonitorRadius->SetParameterName("Radius",false);
   fMonitorRadius->SetRange("Radius>0");
   fMonitorRadius->SetUnitCategory("Length");
   fMonitorRadius->AvailableForStates(G4State_PreInit, G4State_Idle);
+
 
   fMonitorDistance = new G4UIcmdWithADoubleAndUnit("/testhadr/det/setMonitorDistance",this);
   fMonitorDistance->SetGuidance("Input a distance for the monitor");
@@ -156,20 +170,32 @@ DetectorMessenger::~DetectorMessenger()
   delete fMonitorDistance;
   delete fWindowSize;
   delete fWindow;
+  delete fIsWater;
+  delete fWaterThickness;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
-{ 
+{
+  if( command == fIsWater)
+    {fDetector->IsWaterTank(fIsWater->GetNewBoolValue(newValue));}
+  
+  if( command == fWaterThickness)
+    {fDetector->SetWaterThickness(fWaterThickness->GetNewDoubleValue(newValue));}
+  
   if( command == fMaterCmd )
    { fDetector->SetMaterial(newValue);}
+  
   if (command == fMonitorRadius )
     {fDetector->SetMonitorRadius(fMonitorRadius->GetNewDoubleValue(newValue));}
+  
   if (command == fMonitorDistance )
     {fDetector->SetMonitorDistance(fMonitorDistance->GetNewDoubleValue(newValue));}
+  
   if(command == fWindowSize)
     {fDetector->SetWindowSize(fWindowSize->GetNewDoubleValue(newValue));}
+  
   if(command == fWindow)
     {fDetector->SetWindow(fWindow->GetNewBoolValue(newValue));}
 

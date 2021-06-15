@@ -53,6 +53,8 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
+#include "HistoManager.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction()
@@ -63,12 +65,14 @@ DetectorConstruction::DetectorConstruction()
   fBoxY = 12.8*m; //World size Y
   fBoxZ = 5.9*m;  //World size Z
   polyThickness = 50*cm; //thickness of PE shielding
-  pbThickness = 2.5*cm;  //thickness of outter lead shielding
+  pbThickness = 2.5*cm;  //thickness of outer lead shielding
   window = true;
-  monitorR = 10.*cm;
-  monitorD = 100.*cm;
+  waterTank = true;
+  monitorR = 15.*cm;
+  monitorD = 90.*cm;
   windowX = 12.*cm;
   windowY = 12.*cm;
+  waterThickness = 1.0*m;
   DefineMaterials();
   SetMaterial("G4_AIR");   //Sets the material of the world
   fDetectorMessenger = new DetectorMessenger(this);
@@ -190,7 +194,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   G4double labZ = 2.9*m;     //inner Z dimension of the lab
   G4double wallThickness = .33*m;     //thickness of the lab walls
 
-
+  /*
   //create a box with the outer dimensions of the lab
   G4VSolid* wallS = new G4Box("Wall",
 			   (labX + 2*wallThickness)/2,
@@ -385,19 +389,23 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 			      
   PrintParameters();
 
+  */
+
   G4Material* pbShieldMat = G4NistManager::Instance()->FindOrBuildMaterial("G4_Pb");
   G4Material* polyShieldMat = G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYETHYLENE");
 
-  G4double density = 1.04*g/cm3;
+  G4double density = 0.94*g/cm3;
+  G4NistManager* manager = G4NistManager::Instance();
   G4Material* PE =  G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYETHYLENE");
-  G4Isotope* B11 = new G4Isotope("Boron-11", 5,6,11.009*g/mole);
-  G4Isotope* B10 = new G4Isotope("Boron-10", 5,5,10.013*g/mole);
-  G4Element* B = new G4Element("Boron", "B",  2);
-  B->AddIsotope(B11, 80.*perCent);
-  B->AddIsotope(B10, 20.*perCent);
-  BPE = new G4Material("B-Poly",density,2);
-  BPE->AddMaterial(PE,95.*perCent);
+  G4Element* B = manager->FindOrBuildElement("B");
+  G4Element* H = manager->FindOrBuildElement("H");
+  G4Element* O = manager->FindOrBuildElement("O");
+  G4Element* C = manager->FindOrBuildElement("C");
+  BPE = new G4Material("B-Poly",density,4);
   BPE->AddElement(B,5.*perCent);
+  BPE->AddElement(H,11.6*perCent);
+  BPE->AddElement(O,22.2*perCent);
+  BPE->AddElement(C,61.2*perCent);
   
 
   PrimaryGeneratorAction src;
@@ -406,6 +414,121 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   G4double srcX = 12*cm; //space reserved for the source
   G4double srcY = 37.5*cm;
   G4double srcZ = 12*cm;
+
+  G4double srcHeight = srcZ/2+pbThickness+polyThickness; //height of the generator from the ground
+
+  //Make some test volumes to sample flux at different distances
+  G4double wtrX, shldX, wtrZ, shldZ;
+  wtrX = 2*waterThickness+2*monitorR+10*cm;
+  shldX = 2*pbThickness + 2* polyThickness + srcX;
+  
+  wtrZ =  srcHeight + monitorR + 5*cm + waterThickness;
+  shldZ = 2*pbThickness + 2* polyThickness + srcX;
+
+  
+  tp1Y = pbThickness + polyThickness + srcY/2 + monitorD + monitorR + 5*cm + waterThickness;
+  if(wtrX > shldX){
+    tp1X = wtrX;
+  }else{
+    tp1X = shldX;
+  }
+  if(wtrZ > shldZ){
+    tp1Z = wtrZ;
+  }else{
+    tp1Z = shldZ;
+  }
+  
+
+
+  //Test surface 4
+  // 2 m distance
+
+  G4ThreeVector center = shieldPos + G4ThreeVector(0, -tp1Y/2 + monitorR + monitorD + waterThickness+10*cm, tp1Z/2+1*m-srcHeight);
+  centerX = center.getX();
+  centerY = center.getY();
+  centerZ = center.getZ();
+
+  G4Box* testPlane4S = new G4Box("tp4",
+				 tp1X/2 + 2*m,
+				 tp1Y/2 + 2*m,
+				 tp1Z/2 + 1*m);
+  
+  testPlane4L = new G4LogicalVolume(testPlane4S,
+				    fMaterial,
+				    "tp4");
+  
+  testPlane4P = new G4PVPlacement(0,
+				  center,
+				  testPlane4L,
+				  "tp4",
+				  worldL,
+				  false,
+				  0,
+				  checkOverlaps);
+
+  
+
+  //Test Plane 3
+  // 1.5 m distance 
+  G4Box* testPlane3S = new G4Box("tp3",
+				 tp1X/2 + 1.5*m,
+				 tp1Y/2 + 1.5*m,
+				 tp1Z/2 + .75*m);
+  
+  testPlane3L = new G4LogicalVolume(testPlane3S,
+				    fMaterial,
+				    "tp3");
+  
+  testPlane3P = new G4PVPlacement(0,
+				  G4ThreeVector(0,0,-.25*m),
+				         testPlane3L,
+				         "tp3",
+				         testPlane4L,
+				         false,
+				         0,
+				         checkOverlaps);
+
+  //Test Plane 2
+  // 1.0 m distance 
+  G4Box* testPlane2S = new G4Box("tp2",
+				 tp1X/2 + 1*m,
+				 tp1Y/2 + 1*m,
+				 tp1Z/2 + .5*m);
+  
+  testPlane2L = new G4LogicalVolume(testPlane2S,
+				    fMaterial,
+				    "tp2");
+  
+  testPlane2P = new G4PVPlacement(0,
+				  G4ThreeVector(0,0,-.25*m),
+				         testPlane2L,
+				         "tp2",
+				         testPlane3L,
+				         false,
+				         0,
+				         checkOverlaps);
+
+  //Test Plane 1
+  // 0.5 m distance 
+  G4Box* testPlane1S = new G4Box("tp1",
+				 tp1X/2 + .5*m,
+				 tp1Y/2 + .5*m,
+				 tp1Z/2 + 0.25*m);
+  
+  testPlane1L = new G4LogicalVolume(testPlane1S,
+				    fMaterial,
+				    "tp1");
+  
+  testPlane1P = new G4PVPlacement(0,
+				  G4ThreeVector(0,0,-.25*m),
+				         testPlane1L,
+				         "tp1",
+				         testPlane2L,
+				         false,
+				         0,
+				         checkOverlaps);
+
+  
 
   G4VSolid* srcS = new G4Box("source",
 		      srcX/2, srcY/2, srcZ/2);
@@ -444,10 +567,10 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 				    "Poly");
 
   polyShieldP = new G4PVPlacement(0,
-				  shieldPos,
+				  G4ThreeVector(0,-tp1Y/2 + pbThickness + polyThickness + srcY/2, -0.25 *m-tp1Z/2+srcHeight),
 				  polyShieldL,
 				  "polyShield",
-				  worldL,
+				  testPlane1L,
 				  false,
 				  0,
 				  checkOverlaps);
@@ -458,10 +581,10 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 				  "Lead");
 
   pbShieldP = new G4PVPlacement(0,
-				shieldPos,
+				G4ThreeVector(0, -tp1Y/2 + pbThickness + polyThickness + srcY/2, -0.25 *m-tp1Z/2+srcHeight),
 				pbShieldL,
 				"leadShield",
-				worldL,
+				testPlane1L,
 				false,
 				0,
 				checkOverlaps);
@@ -476,15 +599,43 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 				 "Monitor");
 
   monitorP = new G4PVPlacement(0,
-			       shieldPos + G4ThreeVector(0, monitorD, 0),
+			       G4ThreeVector(0, -tp1Y/2 + pbThickness + polyThickness + srcY/2 + monitorD, -0.25 *m-tp1Z/2+srcHeight),
 			       monitorL,
 			       "Monitor",
-			       worldL,
+			       testPlane1L,
 			       false,
 			       0,
 			       checkOverlaps);
   
-				   
+  if(waterTank){
+    G4VSolid* cut = new G4Box("cut",
+			      monitorR+5*cm,
+			      (monitorD-(srcY/2+polyThickness+pbThickness)+monitorR+5*cm)/2,
+			      (monitorR+5*cm+polyThickness+pbThickness+srcZ/2)/2);
+
+    G4VSolid* tankS = new G4Box("water",
+			      monitorR+5*cm+waterThickness,
+			      (monitorD-(srcY/2+polyThickness+pbThickness)+monitorR+5*cm)/2+waterThickness/2,
+			      (monitorR+5*cm+.585*m+waterThickness)/2);
+
+    G4VSolid* waterTankS = new G4SubtractionSolid("Water", tankS, cut, NULL, G4ThreeVector(0,-waterThickness/2,-waterThickness/2));
+
+
+    waterTankL = new G4LogicalVolume(waterTankS,
+				     G4NistManager::Instance()->FindOrBuildMaterial("G4_WATER"),
+				     "Water");
+    waterTankP = new G4PVPlacement(0,
+				   G4ThreeVector(0,tp1Y/2 - (monitorD-(srcY/2+polyThickness+pbThickness)+monitorR+5*cm)/2-waterThickness/2,-0.25*m),
+				  waterTankL,
+				   "Water",
+				  testPlane1L,
+				  false,
+				  0,
+				  checkOverlaps);
+				     
+
+
+  }
 
 	   
 
@@ -565,6 +716,17 @@ void DetectorConstruction::SetMonitorRadius(G4double r){
 
 void DetectorConstruction::SetMonitorDistance(G4double d){
   monitorD = d;
+}
+
+void DetectorConstruction::SetWaterThickness(G4double t){
+  waterThickness = t;
+}
+
+void DetectorConstruction::IsWaterTank(G4bool a){
+  waterTank = a;
+  if(not a){
+    SetWaterThickness(0.0);
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
