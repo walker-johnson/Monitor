@@ -12,55 +12,26 @@
    meeting (04/2013) and note on G4NeutronHP package
 	
  1- MATERIALS AND GEOMETRY DEFINITION
- 
-   It is a single box representing a 'quasi infinite' homogeneous medium.
-   Two parameters define the geometry :
- 	- the material of the box,
-	- the (full) size of the box.
- 	
-   The default geometry (1 m3 of pressurized water) is built in 
-   DetectorConstruction, but the above parameters can be changed interactively 
-   via commands defined in DetectorMessenger.
-   
-   A function, and its associated UI command, allows to build a material
-   directly from a single isotope.
-   
-   To be identified by the ThermalScattering module, the elements composing a
-   material must have a specific name (see G4NeutronHPThermalScatteringNames.cc)
-   Examples of such materials are build in DetectorConstruction.
- 	
+
+   The geometry is a neutron source surrounded by a definable thickness of Borated Polyethelyne,
+   and a definable thickness of lead. The shielding has a window, and a neutron monitor is
+   located in line with the window. Surrounding the neutron monitor is a water tank with a
+   definable thickness. Around this whole system are 4 test volumes to measure the flux
+   at different distances
+   TV1 - 0.5m
+   TV2 - 1.0m
+   TV3 - 1.5m
+   TV4 - 2.0m
+
  2- PHYSICS LIST
-   
-   Only processes of neutronHP package are registered : neutronElastic 
-   (including thermalScattering), neutronInelastic, nCapture; nFission.
-   See class NeutronHPphysics. 
-   No other hadronic nor electromagnetic processes are registered.
-   
-   A command allows to select or not ThermalScattering model.
- 
-   Several hadronic physics options are controlled by environment variables.
-   To trigger them, an envHadronic.csh has been added in this example.
-   One must select the options wished, and do
-        source envHadronic.csh  (or sh)
-   
-   NB. class NeutronHPphysics can be reused with other physicsConstructors,
-   as neutron processes are deleted before to be re-created.	
-	 
  	 
  3- AN EVENT : THE PRIMARY GENERATOR
  
    The primary kinematic is a single particle randomly shooted at the 
    centre of the box. The type of the particle and its energy are set in 
-   PrimaryGeneratorAction (neutron 2 MeV), and can be changed via the G4 
+   PrimaryGeneratorAction (neutron 2.5 MeV), and can be changed via the G4 
    build-in commands of ParticleGun class (see the macros provided with 
-   this example).
- 	
- 4- PHYSICS
-
-   All secondaries are killed in StackingAction. Therefore an event consists of
-   the transport of the primary neutron. Then one survey the thermal and non
-   thermal part of this parcours.
-
+   this example
 
  5- HISTOGRAMS
          
@@ -107,12 +78,11 @@
  7- HOW TO START ?
  
    Execute Hadr04 in 'batch' mode from macro files :
- 	% Hadr04   run01.mac
+ 	% Hadr04  macro.mac
  		
    Execute Hadr04 in 'interactive mode' with visualization :
  	% Hadr04
-	Idle> control/execute vis.mac
- 	....
+        ....
  	Idle> type your commands
  	....
  	Idle> exit
