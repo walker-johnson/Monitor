@@ -50,6 +50,11 @@ set(Hadr04_SCRIPTS
     analysis.mac
     10e7run.mac
     TestPlanePlot.C
+    ShieldCompare.C
+    ComparePlot.C
+    TV1Compare.C
+    TV2Compare.C
+    TV3Compare.C
   )
 
 foreach(_script ${Hadr04_SCRIPTS})

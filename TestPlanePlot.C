@@ -20,7 +20,10 @@ void TestPlanePlot()
   gStyle->SetOptStat("");
 
   //open the file
-  TFile* f = new TFile("25cm_water_10e7_n.root");
+  char file[50];
+  printf("Enter the file name: ");
+  scanf("%[^\n]%*c", file);
+  TFile* f = new TFile(file);
 
   //an array to store all of the readers
   TTreeReader *myReaders[8];
@@ -100,7 +103,7 @@ void TestPlanePlot()
 
   double zCenter = planeLoc[0][5];
   double yCenter = (planeLoc[0][2] + planeLoc[0][3])/2;
-			     
+
 
   for (int i = 0; i <8; i++)
     {
@@ -153,7 +156,7 @@ void TestPlanePlot()
        //by getting the value from the connected reader
 
        //plot all of the data in the 3D histogram
-       xyz[i]->Fill(*x,*y,*z-zCenter);
+       xyz[i]->Fill(*x,*y-yCenter,*z-zCenter);
        //use the plane location array to cut the data and plot the values
        //at each face
        if( *y == planeLoc[i][2]){
@@ -180,10 +183,10 @@ void TestPlanePlot()
   double perA = .01; // cm^2
   double h_to_s = 3600; // s/h
   double pSv_to_microSv = 0.000001; // uSv/pSv
-  double sim_run_time_factor = 10; // 1s/.10s  if we simulate 10E7 neutrons it is like simulating .1s of running time
+  double sim_run_time_factor = 50; // 1s/.10s  if we simulate 10E7 neutrons it is like simulating .1s of running time
 
   //scaling factors to convert flux to dose rate in uSv/h
-  double gammaScale = 10*2.2*0.014*.01*3600*1.6*.0001;
+  double gammaScale = sim_run_time_factor*2.2*0.014*.01*3600*1.6*.0001;
   double neutronScale = B*perA*h_to_s*pSv_to_microSv*sim_run_time_factor;
   double scale;
 
