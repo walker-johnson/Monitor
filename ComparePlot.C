@@ -1,6 +1,16 @@
 #include "TFile.h"
 #include "TTree.h"
 
+/*
+This macro takes three root files output from the Monitor_Lab Hadr04 application, 
+and compares the dose rates in a one dimensional histogram that intersects the center
+of the flux peak. 
+
+The files are hardcoded in the filenames variable, and should be changed to work with 
+the necessary files
+
+*/
+
 void ComparePlot()
 {
   //Define the style for Histograms
@@ -19,31 +29,39 @@ void ComparePlot()
   gStyle->SetTitleSize(0.05,"xyz");
   gStyle->SetOptStat("");
 
+
+  //Files to compare go here
   const char * filenames[3] = {"../DATA/30cmBPoly.root",
 			       "../DATA/40cmBPoly.root",
 			       "../DATA/50cmBPoly.root"};
 
 
+  //gamma flux histograms
   TH1F *xh[3];
   xh[0] = new TH1F("1D flux", "D_{#gamma} @ PE surface", 40, -2, 2);
   xh[1] = new TH1F("1D flux 2", "Flux Comparison 2", 40, -2, 2);
   xh[2] = new TH1F("1D flux 3", "Flux Comparison 3", 40, -2, 2);
 
+  //neutron flux histograms
   TH1F *xhn[3];
   xhn[0] = new TH1F("1D flux  ", "D_{n} @ PE Surface", 40, -2, 2);
   xhn[1] = new TH1F("1D flux 2  ", "Flux Comparison 2  ", 40, -2, 2);
   xhn[2] = new TH1F("1D flux 3  ", "Flux Comparison 3  ", 40, -2, 2);
 
     
-    
+
+  //Here we loop through the files in filenames, and fill the histograms
   for(int i = 0 ; i < 3; i++ ){
     TFile* f = new TFile(filenames[i]);
     printf("%s \n", filenames[i]);
 
+    //Create reader objects
     TTreeReader *testReader = new TTreeReader("gPoly", f);
     TTreeReader *testReaderN = new TTreeReader("nPoly", f);
     TTreeReader *planeReader = new TTreeReader("PlaneLoc", f);
-    
+
+    //This variable is used to hold the equations for the planes of the
+    //Test volumes, and is read from the TTree
     double planeLoc[8][6];
     int l = 3;
 
@@ -55,24 +73,28 @@ void ComparePlot()
     TTreeReaderValue<Double_t> z2(*planeReader, "z2");
   
     while(planeReader->Next()){
-    planeLoc[l][0] = *x1;
-    planeLoc[l][1] = *x2;
-    planeLoc[l][2] = *y1;
-    planeLoc[l][3] = *y2;
-    planeLoc[l][4] = *z1;
-    planeLoc[l][5] = *z2;
-    planeLoc[4+l][0] = *x1;
-    planeLoc[4+l][1] = *x2;
-    planeLoc[4+l][2] = *y1;
-    planeLoc[4+l][3] = *y2;
-    planeLoc[4+l][4] = *z1;
-    planeLoc[4+l][5] = *z2;
-    l--;
+      planeLoc[l][0] = *x1; //TV[i] positive x-plane
+      planeLoc[l][1] = *x2; //TV[i] negative y-plane
+      planeLoc[l][2] = *y1; //etc
+      planeLoc[l][3] = *y2; //etc
+      planeLoc[l][4] = *z1; //etc
+      planeLoc[l][5] = *z2; //etc
+      planeLoc[4+l][0] = *x1; //copies of the pevious values
+      planeLoc[4+l][1] = *x2;
+      planeLoc[4+l][2] = *y1;
+      planeLoc[4+l][3] = *y2;
+      planeLoc[4+l][4] = *z1;
+      planeLoc[4+l][5] = *z2;
+      l--;
     }
 
+    //defines the location of the center of the planes
+    //the x center is zero, and is not needed
     double zCenter = planeLoc[0][5];
     double yCenter = (planeLoc[0][2] + planeLoc[0][3])/2;
 
+    //Reader objects to read the positions of neutrons/gammas
+    //that have crossed a boundary
     TTreeReaderValue<Double_t> x(*testReader, "x");
     TTreeReaderValue<Double_t> y(*testReader, "y");
     TTreeReaderValue<Double_t> z(*testReader, "z");
@@ -81,6 +103,7 @@ void ComparePlot()
     TTreeReaderValue<Double_t> yN(*testReaderN, "y");
     TTreeReaderValue<Double_t> zN(*testReaderN, "z");
 
+    //Filter out only the positions which lie on the top plane of the polyethelyne
     while(testReader->Next()){
       if(*z >= planeLoc[0][4] - 0.526 && *y-yCenter >= -0.3 && *y-yCenter <= -0.2){
 	xh[i]->Fill(*x);  
@@ -107,7 +130,7 @@ void ComparePlot()
   double gammaScale = sim_run_time_factor*2.2*0.014*.01*3600*1.6*.0001;
   double neutronScale = B*perA*h_to_s*pSv_to_microSv*sim_run_time_factor;
   double scale;
-  
+
   TCanvas *c = new TCanvas("1", "Test");
 
   scale = gammaScale;
