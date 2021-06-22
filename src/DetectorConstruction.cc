@@ -423,7 +423,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   shldX = 2*pbThickness + 2* polyThickness + srcX;
   
   wtrZ =  srcHeight + monitorR + 5*cm + waterThickness;
-  shldZ = 2*pbThickness + 2* polyThickness + srcX;
+  shldZ = 2*pbThickness + 2* polyThickness + srcZ;
 
   
   tp1Y = pbThickness + polyThickness + srcY/2 + monitorD + monitorR + 5*cm + waterThickness;
@@ -614,9 +614,9 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 			      (monitorR+5*cm+polyThickness+pbThickness+srcZ/2)/2);
 
     G4VSolid* tankS = new G4Box("water",
-			      monitorR+5*cm+waterThickness,
+			      wtrX/2,
 			      (monitorD-(srcY/2+polyThickness+pbThickness)+monitorR+5*cm)/2+waterThickness/2,
-			      (monitorR+5*cm+.585*m+waterThickness)/2);
+			      wtrZ/2);
 
     G4VSolid* waterTankS = new G4SubtractionSolid("Water", tankS, cut, NULL, G4ThreeVector(0,-waterThickness/2,-waterThickness/2));
 
@@ -625,7 +625,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 				     G4NistManager::Instance()->FindOrBuildMaterial("G4_WATER"),
 				     "Water");
     waterTankP = new G4PVPlacement(0,
-				   G4ThreeVector(0,tp1Y/2 - (monitorD-(srcY/2+polyThickness+pbThickness)+monitorR+5*cm)/2-waterThickness/2,-0.25*m),
+				   G4ThreeVector(0,tp1Y/2 - (monitorD-(srcY/2+polyThickness+pbThickness)+monitorR+5*cm)/2-waterThickness/2, wtrZ/2 - tp1Z/2 - 0.25*m),
 				  waterTankL,
 				   "Water",
 				  testPlane1L,
