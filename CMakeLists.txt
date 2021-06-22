@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------
 # Setup the project
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-project(Hadr04)
+project(Monitor)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -31,21 +31,15 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
-add_executable(Hadr04 Hadr04.cc ${sources} ${headers})
-target_link_libraries(Hadr04 -lm  ${Geant4_LIBRARIES} )
+add_executable(Monitor Monitor.cc ${sources} ${headers})
+target_link_libraries(Monitor -lm  ${Geant4_LIBRARIES} )
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build Hadr04. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.
 #
-set(Hadr04_SCRIPTS
-    debug.mac
-    envHadronic.csh
-    envHadronic.sh 
-    graphite.mac 
-    hadr04.in 
-    run01.mac 
+set(Monitor_SCRIPTS
     vis.mac
     analysis.mac
     10e7run.mac
@@ -57,7 +51,7 @@ set(Hadr04_SCRIPTS
     TV3Compare.C
   )
 
-foreach(_script ${Hadr04_SCRIPTS})
+foreach(_script ${Monitor_SCRIPTS})
   configure_file(
     ${PROJECT_SOURCE_DIR}/${_script}
     ${PROJECT_BINARY_DIR}/${_script}
@@ -68,5 +62,5 @@ endforeach()
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
-install(TARGETS Hadr04 DESTINATION bin)
+install(TARGETS Monitor DESTINATION bin)
 
