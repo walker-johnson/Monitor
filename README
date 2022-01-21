@@ -91,11 +91,13 @@
 	
  7- HOW TO START ?
  
-   Execute Hadr04 in 'batch' mode from macro files :
- 	% Hadr04  macro.mac
+   Execute Monitor in 'batch' mode from macro files :
+ 	% Monitor  *.mac
+	
+	(* = the macro name you would like to run in batch mode)
  		
-   Execute Hadr04 in 'interactive mode' with visualization :
- 	% Hadr04
+   Execute Monitor in 'interactive mode' with visualization :
+ 	% Monitor
         ....
  	Idle> type your commands
  	....
