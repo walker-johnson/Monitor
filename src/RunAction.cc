@@ -88,44 +88,6 @@ void RunAction::BeginOfRunAction(const G4Run*)
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   if ( analysisManager->IsActive() ) {
     analysisManager->OpenFile();
-    G4double tp1X = fDetector->getTP1X();
-    G4double tp1Y = fDetector->getTP1Y();
-    G4double tp1Z = fDetector->getTP1Z();
-    analysisManager->FillNtupleDColumn(12, 0, (fDetector->getCenterX() + tp1X/2 +2*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 1, (fDetector->getCenterX() - tp1X/2 -2*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 2, (fDetector->getCenterY() + tp1Y/2 +2*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 3, (fDetector->getCenterY() - tp1Y/2 -2*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 4, (fDetector->getCenterZ() + tp1Z/2 +1*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 5, (fDetector->getCenterZ() - tp1Z/2 -1*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 6, 4.0);
-    analysisManager->AddNtupleRow(12);
-
-    analysisManager->FillNtupleDColumn(12, 0, (fDetector->getCenterX() + tp1X/2 +1.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 1, (fDetector->getCenterX() - tp1X/2 -1.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 2, (fDetector->getCenterY() + tp1Y/2 +1.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 3, (fDetector->getCenterY() - tp1Y/2 -1.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 4, (fDetector->getCenterZ() + tp1Z/2 +0.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 5, (fDetector->getCenterZ() - tp1Z/2 -1.0*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 6, 3.0);
-    analysisManager->AddNtupleRow(12);
-
-    analysisManager->FillNtupleDColumn(12, 0, (fDetector->getCenterX() + tp1X/2 +1.0*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 1, (fDetector->getCenterX() - tp1X/2 -1.0*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 2, (fDetector->getCenterY() + tp1Y/2 +1.0*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 3, (fDetector->getCenterY() - tp1Y/2 -1.0*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 4, (fDetector->getCenterZ() + tp1Z/2)/1000);
-    analysisManager->FillNtupleDColumn(12, 5, (fDetector->getCenterZ() - tp1Z/2 -1.0*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 6, 2.0);
-    analysisManager->AddNtupleRow(12);
-
-    analysisManager->FillNtupleDColumn(12, 0, (fDetector->getCenterX() + tp1X/2 +0.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 1, (fDetector->getCenterX() - tp1X/2 -0.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 2, (fDetector->getCenterY() + tp1Y/2 +0.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 3, (fDetector->getCenterY() - tp1Y/2 -0.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 4, (fDetector->getCenterZ() + tp1Z/2 -0.5*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 5, (fDetector->getCenterZ() - tp1Z/2 -1.0*m)/1000);
-    analysisManager->FillNtupleDColumn(12, 6, 1.0);
-    analysisManager->AddNtupleRow(12);
   }  
 }
 

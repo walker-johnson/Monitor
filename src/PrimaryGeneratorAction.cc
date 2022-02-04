@@ -52,14 +52,8 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   
   // default particle kinematic
 
-  G4double labX = 6.8*m;
-  G4double labY = 7*m;
-  G4double labZ = 2.9*m;
-  G4double zOffset = -1.5*m+.33*m;
-  G4double srcHeight = .585*m;  //source distance from the floor
-  //G4double srcWidth = .585*m;   //source distance from the walls
 
-  sourcePos = G4ThreeVector(0,-.688*m, -labZ/2 + srcHeight +zOffset);
+  sourcePos = G4ThreeVector(0,0,-0.8*m);
   
   G4ParticleDefinition* particle
            = G4ParticleTable::GetParticleTable()->FindParticle("neutron");

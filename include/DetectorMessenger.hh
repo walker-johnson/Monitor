@@ -48,30 +48,22 @@ class G4UIcmdWithABool;
 
 class DetectorMessenger: public G4UImessenger
 {
-  public:
+public:
   
-    DetectorMessenger(DetectorConstruction* );
-   ~DetectorMessenger();
+  DetectorMessenger(DetectorConstruction* );
+  ~DetectorMessenger();
     
-    virtual void SetNewValue(G4UIcommand*, G4String);
+  virtual void SetNewValue(G4UIcommand*, G4String);
     
-  private:
+private:
   
-    DetectorConstruction*      fDetector;
+  DetectorConstruction*      fDetector;
     
-    G4UIdirectory*             fTestemDir;
-    G4UIdirectory*             fDetDir;
-    G4UIcmdWithAString*        fMaterCmd;
-  G4UIcmdWithADoubleAndUnit* fMonitorRadius;
-  G4UIcmdWithADoubleAndUnit* fMonitorDistance;
-  G4UIcmdWithADoubleAndUnit* fWindowSize;
-  G4UIcmdWithABool* fWindow;
-    G4UIcmdWithADoubleAndUnit* fSizeCmd;
-    G4UIcmdWithADoubleAndUnit* fPolySheildCmd;
-    G4UIcmdWithADoubleAndUnit* fPbSheildCmd;
-    G4UIcommand*               fIsotopeCmd;
-  G4UIcmdWithABool* fIsWater;
-  G4UIcmdWithADoubleAndUnit* fWaterThickness;
+  G4UIdirectory*             fTestemDir;
+  G4UIdirectory*             fDetDir;
+  G4UIcmdWithAString*        fMaterCmd;
+  G4UIcmdWithADoubleAndUnit* fSizeCmd;
+  G4UIcommand*               fIsotopeCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

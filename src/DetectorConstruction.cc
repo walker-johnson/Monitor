@@ -39,6 +39,7 @@
 
 #include "G4Box.hh"
 #include "G4Sphere.hh"
+#include "G4Tubs.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4SubtractionSolid.hh"
@@ -61,18 +62,21 @@ DetectorConstruction::DetectorConstruction()
 :G4VUserDetectorConstruction(),
  worldP(0), worldL(0), fMaterial(0), fDetectorMessenger(0)
 {
-  fBoxX = 13.0*m; //World size X
-  fBoxY = 12.8*m; //World size Y
-  fBoxZ = 5.9*m;  //World size Z
-  polyThickness = 50*cm; //thickness of PE shielding
-  pbThickness = 2.5*cm;  //thickness of outer lead shielding
-  window = true;
-  waterTank = true;
-  monitorR = 15.*cm;
-  monitorD = 90.*cm;
-  windowX = 12.*cm;
-  windowY = 12.*cm;
-  waterThickness = 1.0*m;
+  fTank_x = 7*2.5*9*cm;
+  fTank_y = 9*2.5*9*cm;
+  fTank_z = 18*6*cm;
+  fBoxX = fTank_x+2*m; //World size X
+  fBoxY = fTank_y+2*m; //World size Y
+  fBoxZ = fTank_z+1*m;  //World size Z
+  fRoom_x = fTank_x+1*m;
+  fRoom_y = fTank_y+1*m;
+  fRoom_z = fTank_z+0.5*m;
+  fSideThk = 9*2.5*2*cm;
+  fTopThk = 3*18*cm;
+  fChamber_x = fTank_x - 2*fSideThk;
+  fChamber_y = fTank_y - 2*fSideThk;
+  fChamber_z = fTank_z - fTopThk;
+  fInc = 0.25*m;
   DefineMaterials();
   SetMaterial("G4_AIR");   //Sets the material of the world
   fDetectorMessenger = new DetectorMessenger(this);
@@ -127,15 +131,6 @@ void DetectorConstruction::DefineMaterials()
                          kStateSolid, 293*kelvin, 1*atmosphere);
   graphite->AddElement(C, natoms=1);
 
-  // Li-Polyethalene
-  G4double density = 1.06*g/cm3;
-  G4Material* PE =  G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYETHYLENE");
-  G4Isotope* Li7 = new G4Isotope("Lithium-7", 3,4,7.016*g/mole);
-  G4Element* Li = new G4Element("Lithium", "Li",  1);
-  Li->AddIsotope(Li7, 100.*perCent);
-  LiPE = new G4Material("Li-Poly",density,2);
-  LiPE->AddMaterial(PE,92.5*perCent);
-  LiPE->AddElement(Li,7.5*perCent);
   
  ///G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
@@ -188,458 +183,108 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
                                 false,                      //no boolean operation
  			        0,                          //copy number
 				checkOverlaps);             //option to check for overlaps
-  
-  G4double labX = 6.8*m;     //inner X dimension of the lab
-  G4double labY = 7*m;       //inner Y dimension of the lab
-  G4double labZ = 2.9*m;     //inner Z dimension of the lab
-  G4double wallThickness = .33*m;     //thickness of the lab walls
 
-  /*
-  //create a box with the outer dimensions of the lab
-  G4VSolid* wallS = new G4Box("Wall",
-			   (labX + 2*wallThickness)/2,
-			   (labY + 2*wallThickness)/2,
-			   (labZ + 2*wallThickness)/2);
+  G4Box* roomS = new G4Box("Room",
+			   fRoom_x/2,
+			   fRoom_y/2,
+			   fRoom_z/2);
 
-  //create a box with inner dimensions of the lab
-  G4VSolid* interiorS = new G4Box("Interior",
-			       labX/2,
-			       labY/2,
-			       labZ/2);
-
-  G4double northWindowX = 1.1*m;     //north window x dimension
-  //  G4double northWindowY = .005*m;    //guessing .5cm thickness for window
-  G4double northWindowZ = 1.4*m;    //north window z dimension
-  G4double doorX = 1.62*m;
-  G4double doorZ = 2.11*m;
-
-  //create a solid for the North window cutouts
-  G4VSolid* northWindowCutS = new G4Box("cut",
-			   	        northWindowX/2,
-				        wallThickness/2+.01*m,
-				        northWindowZ/2);
-
-  //create a solid for the East window cutouts
-  G4VSolid* eastWindowCutS = new G4Box("cut2",
-				       wallThickness/2+.01*m,
-				       northWindowX/2,
-				       northWindowZ/2);
-
-  //create a solid for the door cutout
-  G4VSolid* doorCutS = new G4Box("cut3",
-				 doorX/2,
-				 wallThickness/2+.01*m,
-				 doorZ/2);
-
-  //Define some vectors pointing to the centers of the three north windows
-  G4ThreeVector northWindow1 = G4ThreeVector(.28*m+(northWindowX/2)-(labX/2), (labY/2)+ (wallThickness/2), 1.43*m+(northWindowZ/2)-labZ/2);
-  G4ThreeVector northWindow2 = northWindow1 + G4ThreeVector(1.32*m+northWindowX,0,0);
-  G4ThreeVector northWindow3 = northWindow2 + G4ThreeVector(1.32*m+northWindowX,0,0);
-
-  //Define some vectors pointing to the centers of the two east windows
-  G4ThreeVector eastWindow1 = G4ThreeVector((labX/2) + (wallThickness/2), -2.43*m - (northWindowX/2) + (labY/2), 1.43*m + (northWindowZ/2)-labZ/2);
-  G4ThreeVector eastWindow2 = eastWindow1 - G4ThreeVector(0, 1.65*m+northWindowX, 0);
-
-  //Define a vector pointing to the center of the door
-  G4ThreeVector doorPos = G4ThreeVector(-(labX/2)+(doorX/2)+.05*m, -(labY/2) -(wallThickness/2), -(labZ/2)+(doorZ/2));
-				     
-  //subtract the inner box from the outter to create a shell in the shape
-  //and size of the lab
-  G4VSolid* labTempS1 = new  G4SubtractionSolid("labS", wallS, interiorS);
-
-  //now do a subtraction for each window
-  G4VSolid* labTempS2 = new G4SubtractionSolid("temp2", labTempS1, northWindowCutS,
-					       NULL,                //no rotation
-					       northWindow1);    //translate to the position of the first window
-  G4VSolid* labTempS3 = new G4SubtractionSolid("temp2", labTempS2, northWindowCutS,
-					       NULL,                //no rotation
-					       northWindow2);    //translate to the position of the second window
-  G4VSolid* labTempS4 = new G4SubtractionSolid("temp2", labTempS3, northWindowCutS,
-					       NULL,                //no rotation
-					       northWindow3);    //translate to the position of the third window
-  G4VSolid* labTempS5 = new G4SubtractionSolid("temp2", labTempS4, eastWindowCutS,
-					       NULL,                 //no rotation
-					       eastWindow1);    //translate to the position of the first easterly window
-  G4VSolid* labTempS6 = new G4SubtractionSolid("temp2", labTempS5, eastWindowCutS,
-					       NULL,                //no rotation
-					       eastWindow2);    //translate to the position of the second easterly window
-
-  //now do a subtraction for the door
-  G4VSolid* labS = new G4SubtractionSolid("lab", labTempS6, doorCutS,
-					  NULL,
-					  doorPos);
+  roomL = new G4LogicalVolume(roomS,
+			      fMaterial,
+			      "Room");
 
 
-  //some variables for the thicknesses
-  G4double windowThickness = .5*cm;
-  G4double doorThickness = 3*cm;
-  
-  //now add some volumes for the windows
-  //create a solid for the North window cutouts
-  G4VSolid* northWindowS = new G4Box("window1",
-			   	        northWindowX/2,
-				        windowThickness/2,
-				        northWindowZ/2);
-
-
-  //create a solid for the East windows
-  G4VSolid* eastWindowS = new G4Box("window2",
-				       windowThickness/2,
-				       northWindowX/2,
-				       northWindowZ/2);
-
-  //create a solid for the door cutout
-  G4VSolid* doorS = new G4Box("door",
-				 doorX/2,
-				 doorThickness,
-				 doorZ/2);
-
-
-  
-  G4Material* labWallMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_CONCRETE");
-  G4Material* windowMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_GLASS_PLATE");
-  G4Material* doorMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_CELLULOSE_CELLOPHANE");
-
-  //create a logical volume for the lab and place it
-  labL = new G4LogicalVolume(labS,
-			     labWallMaterial,
-			     "lab");
-  labP = new G4PVPlacement(0,                                 //no rotation
-			   G4ThreeVector(0,0, -1.5*m+wallThickness),        //move to the bottom of the world box, we are not interested in what happens below the ground
-			   labL,                              //its logical volume
-			   "lab",                             //its name
-			   worldL,                            //its mother volume
-		           false,                             //no boolean operation
-			   0,                                 //copy number
-			   checkOverlaps);                    //option to check for overlaps
-
-  //create the logical volumes for the windows and doors and place them
-  win1L = new G4LogicalVolume(northWindowS,
-			      windowMaterial,
-			      "window1");
-  win1P = new G4PVPlacement(0,
-			    northWindow1- G4ThreeVector(0,0, 1.5*m-wallThickness) ,
-			    win1L,
-			    "window1",
+  roomP = new G4PVPlacement(0,
+			    G4ThreeVector(0,0,-fBoxZ/2+fRoom_z/2),
+			    roomL,
+			    "Room",
 			    worldL,
 			    false,
 			    0,
 			    checkOverlaps);
 
-  win2L = new G4LogicalVolume(northWindowS,
-			      windowMaterial,
-			      "window2");
-  win2P = new G4PVPlacement(0,
-			    northWindow2- G4ThreeVector(0,0, 1.5*m-wallThickness) ,
-			    win2L,
-			    "window2",
-			    worldL,
-			    false,
-			    0,
-			    checkOverlaps);
+
+  G4Material* water = G4NistManager::Instance()->FindOrBuildMaterial("G4_WATER");
   
-  win3L = new G4LogicalVolume(northWindowS,
-			      windowMaterial,
-			      "window3");
-  win3P = new G4PVPlacement(0,
-			    northWindow3- G4ThreeVector(0,0, 1.5*m-wallThickness) ,
-			    win3L,
-			    "window3",
-			    worldL,
+  G4Box* tankS = new G4Box("tank",
+			   fTank_x/2,
+			   fTank_y/2,
+			   fTank_z/2);
+
+  tankL = new G4LogicalVolume(tankS,
+			      water,
+			      "Tank");
+
+  tankP = new G4PVPlacement(0,
+			    G4ThreeVector(0,0,-fRoom_z/2+fTank_z/2),
+			    tankL,
+			    "Tank",
+			    roomL,
 			    false,
 			    0,
 			    checkOverlaps);
+
+
+  G4Box* chamberS = new G4Box("Chamber",
+			      fChamber_x/2,
+			      fChamber_y/2,
+			      fChamber_z/2);
+
+  chamberL = new G4LogicalVolume(chamberS,
+				 fMaterial,
+				 "Chamber");
+
+  chamberP = new G4PVPlacement(0,
+			      G4ThreeVector(0,0,-fTank_z/2 + fChamber_z/2),
+			      chamberL,
+			      "Chamber",
+			      tankL,
+			      false,
+			      0,
+			      checkOverlaps);
+
+  G4VSolid* gapS = new G4Tubs("Gap",
+			    0,
+			    0.5*cm,
+			    (fTank_x/2 - fChamber_x/2)/2,
+			    0.0*deg, 360.0*deg);
+
+  gapL = new G4LogicalVolume(gapS,
+			     fMaterial,
+			     "Gap");
+
+  G4PVPlacement* gapsP [24];
+
+  G4RotationMatrix* rMatrix = new G4RotationMatrix();
+  rMatrix->rotateY(90.*deg);
+
+  for(int i =0; i< 6; i++){
+    for(int j=0; j<4; j++){
+      //placements in here
+      std::string stri = std::to_string(i);
+      std::string strj = std::to_string(j);
+      std::string name = "gap";
+      std::string name2 = name.append(stri);
+      std::string name3 = name2.append(strj);
+      G4double yTrans = -fTank_x/2 + (fTank_x/2-fChamber_x/2)/2 + i*22.5*cm; 
+      G4double zTrans = -j*15*cm; 
+      G4double xTrans = -fTank_y/2+(fTank_x/2 - fChamber_x/2);
+      gapsP[i+j] = new G4PVPlacement(rMatrix,
+				     G4ThreeVector(xTrans, yTrans, zTrans),
+				     gapL,
+				     name3,
+				     tankL,
+				     false,
+				     0,
+				     checkOverlaps);
+    }
+  }
+			     
 			    
-  win4L = new G4LogicalVolume(eastWindowS,
-			      windowMaterial,
-			      "window4");
-  win4P = new G4PVPlacement(0,
-			    eastWindow1- G4ThreeVector(0,0, 1.5*m-wallThickness) ,
-			    win4L,
-			    "window4",
-			    worldL,
-			    false,
-			    0,
-			    checkOverlaps);
-
-  win5L = new G4LogicalVolume(eastWindowS,
-			      windowMaterial,
-			      "window5");
-  win5P = new G4PVPlacement(0,
-			    eastWindow2- G4ThreeVector(0,0, 1.5*m-wallThickness) ,
-			    win5L,
-			    "window5",
-			    worldL,
-			    false,
-			    0,
-			    checkOverlaps);
-
-  doorL = new G4LogicalVolume(doorS,
-			      doorMaterial,
-			      "door");
-  doorP = new G4PVPlacement(0,
-			    doorPos- G4ThreeVector(0,0, 1.5*m-wallThickness) ,
-		            doorL,
-			    "door",
-		            worldL,
-			    false,
-			    0,
-			    checkOverlaps);
-			    
-			      
-  PrintParameters();
-
-  */
-
-  G4Material* pbShieldMat = G4NistManager::Instance()->FindOrBuildMaterial("G4_Pb");
-  G4Material* polyShieldMat = G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYETHYLENE");
-
-  G4double density = 0.94*g/cm3;
-  G4NistManager* manager = G4NistManager::Instance();
-  G4Material* PE =  G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYETHYLENE");
-  G4Element* B = manager->FindOrBuildElement("B");
-  G4Element* H = manager->FindOrBuildElement("H");
-  G4Element* O = manager->FindOrBuildElement("O");
-  G4Element* C = manager->FindOrBuildElement("C");
-  BPE = new G4Material("B-Poly",density,4);
-  BPE->AddElement(B,5.*perCent);
-  BPE->AddElement(H,11.6*perCent);
-  BPE->AddElement(O,22.2*perCent);
-  BPE->AddElement(C,61.2*perCent);
-  
-
-  PrimaryGeneratorAction src;
-  G4ThreeVector shieldPos = src.sourcePos;
-
-  G4double srcX = 12*cm; //space reserved for the source
-  G4double srcY = 37.5*cm;
-  G4double srcZ = 12*cm;
-
-  G4double srcHeight = srcZ/2+pbThickness+polyThickness; //height of the generator from the ground
-
-  //Make some test volumes to sample flux at different distances
-  G4double wtrX, shldX, wtrZ, shldZ;
-  wtrX = 2*waterThickness+2*monitorR+10*cm;
-  shldX = 2*pbThickness + 2* polyThickness + srcX;
-  
-  wtrZ =  srcHeight + monitorR + 5*cm + waterThickness;
-  shldZ = 2*pbThickness + 2* polyThickness + srcZ;
+		 
+			   
 
   
-  tp1Y = pbThickness + polyThickness + srcY/2 + monitorD + monitorR + 5*cm + waterThickness;
-  if(wtrX > shldX){
-    tp1X = wtrX;
-  }else{
-    tp1X = shldX;
-  }
-  if(wtrZ > shldZ){
-    tp1Z = wtrZ;
-  }else{
-    tp1Z = shldZ;
-  }
-  
-
-
-  //Test surface 4
-  // 2 m distance
-
-  G4ThreeVector center = shieldPos + G4ThreeVector(0, -tp1Y/2 + monitorR + monitorD + waterThickness+10*cm, tp1Z/2+1*m-srcHeight);
-  centerX = center.getX();
-  centerY = center.getY();
-  centerZ = center.getZ();
-
-  G4Box* testPlane4S = new G4Box("tp4",
-				 tp1X/2 + 2*m,
-				 tp1Y/2 + 2*m,
-				 tp1Z/2 + 1*m);
-  
-  testPlane4L = new G4LogicalVolume(testPlane4S,
-				    fMaterial,
-				    "tp4");
-  
-  testPlane4P = new G4PVPlacement(0,
-				  center,
-				  testPlane4L,
-				  "tp4",
-				  worldL,
-				  false,
-				  0,
-				  checkOverlaps);
-
-  
-
-  //Test Plane 3
-  // 1.5 m distance 
-  G4Box* testPlane3S = new G4Box("tp3",
-				 tp1X/2 + 1.5*m,
-				 tp1Y/2 + 1.5*m,
-				 tp1Z/2 + .75*m);
-  
-  testPlane3L = new G4LogicalVolume(testPlane3S,
-				    fMaterial,
-				    "tp3");
-  
-  testPlane3P = new G4PVPlacement(0,
-				  G4ThreeVector(0,0,-.25*m),
-				         testPlane3L,
-				         "tp3",
-				         testPlane4L,
-				         false,
-				         0,
-				         checkOverlaps);
-
-  //Test Plane 2
-  // 1.0 m distance 
-  G4Box* testPlane2S = new G4Box("tp2",
-				 tp1X/2 + 1*m,
-				 tp1Y/2 + 1*m,
-				 tp1Z/2 + .5*m);
-  
-  testPlane2L = new G4LogicalVolume(testPlane2S,
-				    fMaterial,
-				    "tp2");
-  
-  testPlane2P = new G4PVPlacement(0,
-				  G4ThreeVector(0,0,-.25*m),
-				         testPlane2L,
-				         "tp2",
-				         testPlane3L,
-				         false,
-				         0,
-				         checkOverlaps);
-
-  //Test Plane 1
-  // 0.5 m distance 
-  G4Box* testPlane1S = new G4Box("tp1",
-				 tp1X/2 + .5*m,
-				 tp1Y/2 + .5*m,
-				 tp1Z/2 + 0.25*m);
-  
-  testPlane1L = new G4LogicalVolume(testPlane1S,
-				    fMaterial,
-				    "tp1");
-  
-  testPlane1P = new G4PVPlacement(0,
-				  G4ThreeVector(0,0,-.25*m),
-				         testPlane1L,
-				         "tp1",
-				         testPlane2L,
-				         false,
-				         0,
-				         checkOverlaps);
-
-  
-
-  G4VSolid* srcS = new G4Box("source",
-		      srcX/2, srcY/2, srcZ/2);
-
-  G4VSolid* polyCut = new G4Box("Poly",
-			       srcX/2 + polyThickness,
-			       srcY/2 + polyThickness,
-			       srcZ/2 + polyThickness);
-
-  G4VSolid* pbCut = new G4Box("Lead",
-			srcX/2 + polyThickness + pbThickness,
-			srcY/2 + polyThickness + pbThickness,
-			srcZ/2 + polyThickness + pbThickness);
-  
-  G4VSolid* windowCut = new G4Box("Window",
-				  windowX/2,
-				  polyThickness/2 + pbThickness/2 + 2*cm,
-				  windowY/2);
-
-  G4VSolid* polyShieldS;
-  G4VSolid* pbShieldS;
-
-  if(window){
-
-    G4VSolid* polyShieldInter = new G4SubtractionSolid("Poly Shield", polyCut, srcS); 
-    G4VSolid* pbShieldInter = new G4SubtractionSolid("Lead Shield", pbCut, polyCut);
-    polyShieldS = new G4SubtractionSolid("Poly Shield", polyShieldInter, windowCut, NULL, G4ThreeVector(0, srcY/2 +polyThickness/2 + pbThickness/2, 0)); 
-    pbShieldS = new G4SubtractionSolid("Lead Shield", pbShieldInter, windowCut, NULL, G4ThreeVector(0, srcY/2 +polyThickness/2 + pbThickness/2, 0) );
-  }else{
-    polyShieldS = new G4SubtractionSolid("Poly Shield", polyCut, srcS); 
-    pbShieldS = new G4SubtractionSolid("Lead Shield", pbCut, polyCut);
-  }
-  
-  polyShieldL = new G4LogicalVolume(polyShieldS,
-				    BPE,
-				    "Poly");
-
-  polyShieldP = new G4PVPlacement(0,
-				  G4ThreeVector(0,-tp1Y/2 + pbThickness + polyThickness + srcY/2, -0.25 *m-tp1Z/2+srcHeight),
-				  polyShieldL,
-				  "polyShield",
-				  testPlane1L,
-				  false,
-				  0,
-				  checkOverlaps);
-
-
-  pbShieldL = new G4LogicalVolume(pbShieldS,
-				  pbShieldMat,
-				  "Lead");
-
-  pbShieldP = new G4PVPlacement(0,
-				G4ThreeVector(0, -tp1Y/2 + pbThickness + polyThickness + srcY/2, -0.25 *m-tp1Z/2+srcHeight),
-				pbShieldL,
-				"leadShield",
-				testPlane1L,
-				false,
-				0,
-				checkOverlaps);
-
-  G4VSolid* monitorS = new G4Sphere("Monitor",
-				    0 * cm, monitorR,
-				    0.0 * deg, 360.00 * deg,
-				    0.0 * deg, 360.00 * deg);
-  
-  monitorL = new G4LogicalVolume(monitorS,
-				 polyShieldMat,
-				 "Monitor");
-
-  monitorP = new G4PVPlacement(0,
-			       G4ThreeVector(0, -tp1Y/2 + pbThickness + polyThickness + srcY/2 + monitorD, -0.25 *m-tp1Z/2+srcHeight),
-			       monitorL,
-			       "Monitor",
-			       testPlane1L,
-			       false,
-			       0,
-			       checkOverlaps);
-  
-  if(waterTank){
-    G4VSolid* cut = new G4Box("cut",
-			      monitorR+5*cm,
-			      (monitorD-(srcY/2+polyThickness+pbThickness)+monitorR+5*cm)/2,
-			      (monitorR+5*cm+polyThickness+pbThickness+srcZ/2)/2);
-
-    G4VSolid* tankS = new G4Box("water",
-			      wtrX/2,
-			      (monitorD-(srcY/2+polyThickness+pbThickness)+monitorR+5*cm)/2+waterThickness/2,
-			      wtrZ/2);
-
-    G4VSolid* waterTankS = new G4SubtractionSolid("Water", tankS, cut, NULL, G4ThreeVector(0,-waterThickness/2,-waterThickness/2));
-
-
-    waterTankL = new G4LogicalVolume(waterTankS,
-				     G4NistManager::Instance()->FindOrBuildMaterial("G4_WATER"),
-				     "Water");
-    waterTankP = new G4PVPlacement(0,
-				   G4ThreeVector(0,tp1Y/2 - (monitorD-(srcY/2+polyThickness+pbThickness)+monitorR+5*cm)/2-waterThickness/2, wtrZ/2 - tp1Z/2 - 0.25*m),
-				  waterTankL,
-				   "Water",
-				  testPlane1L,
-				  false,
-				  0,
-				  checkOverlaps);
-				     
-
-
-  }
-
-	   
-
-  		      
   //always return the root volume
   //
   return worldP;
@@ -647,20 +292,6 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::SetPolyThickness(G4double thk)
-{
-  polyThickness = thk;
-  G4RunManager::GetRunManager()->ReinitializeGeometry();
-
-}
-
-
-void DetectorConstruction::SetLeadThickness(G4double thk)
-{
-  pbThickness = thk;
-  G4RunManager::GetRunManager()->ReinitializeGeometry();
-
-}
 
 void DetectorConstruction::PrintParameters()
 {
@@ -701,33 +332,7 @@ void DetectorConstruction::SetSize(G4double x, G4double y, G4double z)
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 
-void DetectorConstruction::SetWindow(G4bool w){
-  window = w;
-}
 
-void DetectorConstruction::SetWindowSize(G4double x){
-  windowX = x;
-  windowY = x;
-}
-
-void DetectorConstruction::SetMonitorRadius(G4double r){
-  monitorR = r;
-}
-
-void DetectorConstruction::SetMonitorDistance(G4double d){
-  monitorD = d;
-}
-
-void DetectorConstruction::SetWaterThickness(G4double t){
-  waterThickness = t;
-}
-
-void DetectorConstruction::IsWaterTank(G4bool a){
-  waterTank = a;
-  if(not a){
-    SetWaterThickness(0.0);
-  }
-}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
