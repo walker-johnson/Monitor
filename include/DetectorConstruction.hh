@@ -45,131 +45,68 @@ class DetectorMessenger;
 
 class DetectorConstruction : public G4VUserDetectorConstruction
 {
-  public:
+public:
   
-    DetectorConstruction();
-   ~DetectorConstruction();
-
-  public:
+  DetectorConstruction();
+  ~DetectorConstruction();
   
-    virtual G4VPhysicalVolume* Construct();
+  virtual G4VPhysicalVolume* Construct();
+  void SetSize     (G4double, G4double, G4double);              
+  void SetMaterial (G4String);
+    
 
-    G4Material* 
-    MaterialWithSingleIsotope(G4String, G4String, G4double, G4int, G4int);
+  G4Material* 
+  MaterialWithSingleIsotope(G4String, G4String, G4double, G4int, G4int);
          
-    void SetSize     (G4double, G4double, G4double);              
-    void SetMaterial (G4String);
-    void SetPolyThickness (G4double);
-    void SetLeadThickness (G4double);
-    void SetWindow (G4bool);
-    void SetWindowSize (G4double);
-    void SetMonitorRadius (G4double);
-    void SetMonitorDistance (G4double);
-    void SetWaterThickness (G4double);
-    void IsWaterTank (G4bool);
-  G4double getCenterX(){return centerX;};
-  G4double getCenterY(){return centerY;};
-  G4double getCenterZ(){return centerZ;};
-  G4double getTP1X(){return tp1X;};
-  G4double getTP1Y(){return tp1Y;};
-  G4double getTP1Z(){return tp1Z;};
-    
-  
-  public:
-  
-     const
-     G4VPhysicalVolume* GetWorld()      {return worldP;};           
+  const
+  G4VPhysicalVolume* GetWorld()      {return worldP;};           
                           
-     G4Material*        GetMaterial()   {return fMaterial;};
-     G4double           GetSize()       {return fBoxX;};
-     void               PrintParameters();
+  G4Material*        GetMaterial()   {return fMaterial;};
+  G4double           GetSize()       {return fBoxX;};
+  void               PrintParameters();
+
+  //world
+  G4LogicalVolume* worldL;
+  G4VPhysicalVolume* worldP;
+  //room
+  G4LogicalVolume* roomL;
+  G4VPhysicalVolume* roomP;
 
   
 
-     G4Material* LiPE;
-     G4Material* BPE;
+private:
 
-     G4VPhysicalVolume* wallP;
-     G4LogicalVolume*   wallL;
-
-     G4VPhysicalVolume* labP;
-     G4LogicalVolume* labL;
-
-     G4VPhysicalVolume* win1P;
-     G4LogicalVolume* win1L;
-
-     G4VPhysicalVolume* win2P;
-     G4LogicalVolume* win2L;
-
-     G4VPhysicalVolume* win3P;
-     G4LogicalVolume* win3L;
-
-     G4VPhysicalVolume* win4P;
-     G4LogicalVolume* win4L;
-
-     G4VPhysicalVolume* win5P;
-     G4LogicalVolume* win5L;
-
-     G4VPhysicalVolume* doorP;
-     G4LogicalVolume* doorL;
-  
-     G4VPhysicalVolume* shieldP;
-     G4LogicalVolume* shieldL;
-
-     G4VPhysicalVolume* worldP;
-     G4LogicalVolume*   worldL;
-
-  G4VPhysicalVolume* polyShieldP;
-  G4LogicalVolume* polyShieldL;
-
-  G4VPhysicalVolume* pbShieldP;
-  G4LogicalVolume* pbShieldL;
-
-  G4VPhysicalVolume* monitorP;
-  G4LogicalVolume* monitorL;
-
-  G4VPhysicalVolume* testPlane1P;
-  G4LogicalVolume* testPlane1L;
-
-  G4VPhysicalVolume* testPlane2P;
-  G4LogicalVolume* testPlane2L;
-
-  G4VPhysicalVolume* testPlane3P;
-  G4LogicalVolume* testPlane3L;
-
-  G4VPhysicalVolume* testPlane4P;
-  G4LogicalVolume* testPlane4L;
-
-  G4VPhysicalVolume* waterTankP;
-  G4LogicalVolume* waterTankL;
-  
-  private:
-
-  G4bool window;
-  G4bool waterTank;
-  G4double monitorR;
-  G4double monitorD;
-  G4double windowX;
-  G4double windowY;
-  G4double waterThickness;
-  G4double           polyThickness;
-  G4double           pbThickness;
-  G4double           fBoxX;
-  G4double           fBoxY;
-  G4double           fBoxZ;
-  G4Material*        fMaterial;
+  G4double fBoxX;
+  G4double fBoxY;
+  G4double fBoxZ;
+  G4double fRoom_x;
+  G4double fRoom_y;
+  G4double fRoom_z;
+  G4double fTank_x;
+  G4double fTank_y;
+  G4double fTank_z;
+  G4double fChamber_x;
+  G4double fChamber_y;
+  G4double fChamber_z;
+  G4double fSideThk;
+  G4double fTopThk;
+  G4double fInc;
+  G4Material* fMaterial;
   DetectorMessenger* fDetectorMessenger;
-  G4double centerX;
-  G4double centerY;
-  G4double centerZ;
-  G4double tp1X;
-  G4double tp1Y;
-  G4double tp1Z;
 
-  private:
+
+  //tank
+  G4LogicalVolume* tankL;
+  G4VPhysicalVolume* tankP;
+  //chamber
+  G4LogicalVolume* chamberL;
+  G4VPhysicalVolume* chamberP;
+  //gaps
+  G4LogicalVolume* gapL;
+  
     
-     void               DefineMaterials();
-     G4VPhysicalVolume* ConstructVolumes();     
+  void               DefineMaterials();
+  G4VPhysicalVolume* ConstructVolumes();     
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
