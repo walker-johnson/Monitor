@@ -88,6 +88,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
      G4Material* LiPE;
      G4Material* BPE;
+     G4Material* Fe;
+     G4Material* Al;
 
      G4VPhysicalVolume* wallP;
      G4LogicalVolume*   wallL;
@@ -118,6 +120,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
      G4VPhysicalVolume* worldP;
      G4LogicalVolume*   worldL;
+
+  G4VPhysicalVolume* ironfilterP;
+  G4LogicalVolume* ironfilterL;
+
+  G4VPhysicalVolume* aluminumfilterP;
+  G4LogicalVolume* aluminumfilterL;
 
   G4VPhysicalVolume* polyShieldP;
   G4LogicalVolume* polyShieldL;

@@ -68,10 +68,10 @@ DetectorConstruction::DetectorConstruction()
   pbThickness = 2.5*cm;  //thickness of outer lead shielding
   window = true;
   waterTank = true;
-  monitorR = 15.*cm;
-  monitorD = 90.*cm;
-  windowX = 12.*cm;
-  windowY = 12.*cm;
+  monitorR = 15.*cm; //neutron monitor Radius
+  monitorD = 90.*cm; //neutron monitor distance
+  windowX = 12.*cm; //neutron beam window X
+  windowY = 12.*cm; //neutron beam window Y
   waterThickness = 1.0*m;
   DefineMaterials();
   SetMaterial("G4_AIR");   //Sets the material of the world
@@ -181,7 +181,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
                                   "World");                  //its name
 
   worldP    = new G4PVPlacement(0,                          //no rotation
-                                G4ThreeVector(),   //at 0,0,0
+                                G4ThreeVector(),            //at 0,0,0
                                 worldL,                     //its logical volume
                                 "World",                    //its name
                                 0,                          //its mother  volume
@@ -392,6 +392,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   */
 
   G4Material* pbShieldMat = G4NistManager::Instance()->FindOrBuildMaterial("G4_Pb");
+  G4Material* ironfilterMat = G4NistManager::Instance() ->FindOrBuildMaterial("G4_Fe");
+  G4Material* aluminumfilterMat = G4NistManager::Instance() ->FindOrBuildMaterial("G4_Al");
   G4Material* polyShieldMat = G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYETHYLENE");
 
   G4double density = 0.94*g/cm3;
@@ -411,8 +413,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   PrimaryGeneratorAction src;
   G4ThreeVector shieldPos = src.sourcePos;
 
-  G4double srcX = 12*cm; //space reserved for the source
-  G4double srcY = 37.5*cm;
+  G4double srcX = 12*cm; //size of the neutron source; used to cut chamber in polyethylene
+  G4double srcY = 77.5*cm;
   G4double srcZ = 12*cm;
 
   G4double srcHeight = srcZ/2+pbThickness+polyThickness; //height of the generator from the ground
@@ -529,6 +531,9 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 				         checkOverlaps);
 
   
+  G4VSolid* ironfilter = new G4Box("iron", .5*cm, .5*cm, .5*cm);
+  
+  //G4VSolid* aluminumfilter = new G4Box("aluminum", srcX/2, srcY/2, srcZ/2);
 
   G4VSolid* srcS = new G4Box("source",
 		      srcX/2, srcY/2, srcZ/2);
@@ -550,6 +555,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 
   G4VSolid* polyShieldS;
   G4VSolid* pbShieldS;
+  G4VSolid* ironfilterS;
+  //G4VSolid* aluminumfilterS;
 
   if(window){
 
@@ -574,6 +581,14 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 				  false,
 				  0,
 				  checkOverlaps);
+				  
+  ironfilterL = new G4LogicalVolume(ironfilterS, ironfilterMat, "Iron");
+  
+  //ironfilterP = new G4PVPlacement(0, G4ThreeVector(.3*m,0,0), ironfilterL, "iron filter", testPlane1L, false, 0, checkOverlaps);
+  
+  //aluminumfilterL = new G4LogicalVolume(ironfilterS, ironfilterMat, "Aluminum");
+  
+  //aluminumfilterP = new G4PVPlacement(0, G4ThreeVector(0, -tp1Y/2 + pbThickness + polyThickness +srcY/2, -.025 *m-tp1Z/2 + srcHeight), aluminumfilterL, "aluminum filter", testPlane1L, false, 0, checkOverlaps);
 
 
   pbShieldL = new G4LogicalVolume(pbShieldS,
