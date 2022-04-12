@@ -531,7 +531,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 				         checkOverlaps);
 
   
-  G4VSolid* ironfilter = new G4Box("iron", .5*cm, .5*cm, .5*cm);
+  G4VSolid* ironfilterS = new G4Box("iron", .5*cm, .5*cm, .5*cm);
   
   //G4VSolid* aluminumfilter = new G4Box("aluminum", srcX/2, srcY/2, srcZ/2);
 
@@ -555,7 +555,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 
   G4VSolid* polyShieldS;
   G4VSolid* pbShieldS;
-  G4VSolid* ironfilterS;
+  //G4VSolid* ironfilterS;
   //G4VSolid* aluminumfilterS;
 
   if(window){
@@ -584,7 +584,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 				  
   ironfilterL = new G4LogicalVolume(ironfilterS, ironfilterMat, "Iron");
   
-  //ironfilterP = new G4PVPlacement(0, G4ThreeVector(.3*m,0,0), ironfilterL, "iron filter", testPlane1L, false, 0, checkOverlaps);
+  ironfilterP = new G4PVPlacement(0, G4ThreeVector(.3*m,0,0), ironfilterL, "iron filter", testPlane1L, false, 0, checkOverlaps);
   
   //aluminumfilterL = new G4LogicalVolume(ironfilterS, ironfilterMat, "Aluminum");
   

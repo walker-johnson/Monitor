@@ -85,13 +85,13 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   //
   //distribution uniform in solid angle
   //
-  G4double cosTheta = 2*G4UniformRand() - 1., phi = twopi*G4UniformRand();
-  G4double sinTheta = std::sqrt(1. - cosTheta*cosTheta);
-  G4double ux = sinTheta*std::cos(phi),
-           uy = sinTheta*std::sin(phi),
-           uz = cosTheta;
+  //G4double cosTheta = 2*G4UniformRand() - 1., phi = twopi*G4UniformRand();
+  //G4double sinTheta = std::sqrt(1. - cosTheta*cosTheta);
+  //G4double ux = sinTheta*std::cos(phi),
+  //         uy = sinTheta*std::sin(phi),
+  //         uz = cosTheta;
 
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(ux,uy,uz));
+  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0,1,0));
   
   fParticleGun->GeneratePrimaryVertex(anEvent);
 }
